@@ -14,6 +14,11 @@ The plugin contains the dynamic screen definitions using json schemas that are u
 
 It is possible to use this Agent with an on-prem OpCon installation or with a SMA Relay installation. In both instances the agent .dll files are copied into the **plugins** directory associated with the installation.
 
+## Release 25.0.3
+
+:eight_spoked_asterisk: **CON-1173**: Updated SEQ task type to retrieve SEQ value from the Ease Datacenter and store it in a global property on the local OpCon system.    
+:eight_spoked_asterisk: **CON-1250**: Add log file cleanup logic to TaskProtocol module..
+
 ## Release 25.0.2
 
 :eight_spoked_asterisk: **CON-978**: Add debug mode selector agent definition and correct job status checking.

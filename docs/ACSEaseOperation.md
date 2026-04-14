@@ -78,7 +78,7 @@ RESET                    | Reset a Single Prompt
 RSJ                      | Run Symitar Job (single-threaded)    
 RSJEDIT                  | Runs Symitar Job with Edit File      
 RSJMULTI                 | Run Symitar Job (multi-threaded)     
-SEQ                      | Collect the SEQ of a Report  
+SEQ                      | Collect the SEQ of a Report and store it in a global property on the local OpCon system 
 SEQ-SEND                 | Copy Specified SEQ to Reports for FTP
 TRANSLATE2COMMAS         | Answer a Single Prompt containing commas
 
@@ -471,7 +471,7 @@ Enter details for Task Type **SEQ**.
 1.  Select the **Task Details** button.
 2.  In the **Integration Selection** section, select the primary integration which is an ACSEase connection previously defined.
 3.  In the **TaskConfiguration** section
-    - In the **Identifier** field enter a unique identifier for the task.
+    - In the **Identifier** field enter a unique identifier that will be used to create a schedule instance property containing the sequence number on the Ease Datacenter OpCOn environment. Any (.) period or (_) underscore characters are removed and the adjust identier is prefixed with SEQ-. The sequence number value is retrieved from the Ease Datacenter and stored in a global property on the local system. If the Identifier is ABC.DEF then the sequence number will be stored on the local system in a property SEQ-ABCDEF.
     - In the **Job Name** field enter the name of the RSJ job associated with this request.
     - In the **Report Name** field enter the report name associated with the task.
 4.  Save the definition changes. 
