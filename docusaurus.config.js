@@ -28,7 +28,7 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
-          breadcrumbs: false,
+          breadcrumbs: true,
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:

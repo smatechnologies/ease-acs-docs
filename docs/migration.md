@@ -1,18 +1,28 @@
----
+﻿---
+title: PowerShell Ease to ACS Ease migration
+description: How to migrate existing PowerShell Ease tasks to the ACS Ease environment using the conversion utilities.
+tags: [type/procedural, role/automation-engineer, feature/ease-acs]
 sidebar_label: 'Migration'
 ---
 
-# PowerShell Ease to ACS Ease Migration
-The conversion program provides a mechanism to migrate existing PowerShell Ease tasks to the new ACS Ease environment.
+# PowerShell Ease to ACS Ease migration
 
-One of the major changes is that Ease bundle tasks are no longer a single task and instead will be converted to sub-schedule containing 
-seperate tasks executed in the correct sequence. The sub-schedules are installed on the local OpCon system and are instigated by selecting a
-BUNDLE-* task type which injects a container job into the local Ease schedule (**EASE-LOCAL**). 
+**Theme:** Build  
+**Who Is It For?** Automation Engineer
 
-## Install Conversion Utilities
-Download the ACS Ease migration software (ACSEaseMigration.zip) from the FTP site **/OpCon Releases/Integrations/Ease/Migration Utility** and extract the ACSEaseMigration.zip file into a directory on a Windows system.
+## What is it?
 
-Edit the Conversion.config file setting the information using the **Encrypt.exe** utility to encrypt passwords and tokens.
+The conversion program migrates existing PowerShell Ease tasks to the ACS Ease environment.
+
+Ease bundle tasks are converted from a single task to a sub-schedule of separate tasks run in sequence. The sub-schedules are installed on the local OpCon system and triggered by a BUNDLE-* task type, which injects a container job into **EASE-LOCAL**.
+
+- Use this process to convert existing Windows embedded script Ease tasks to ACS Ease tasks without modifying frequencies, dependencies, or events.
+- Use this process when Ease bundle tasks need to be converted to the sub-schedule structure required by ACS Ease.
+
+## Install conversion utilities
+Download the ACS Ease migration software (`ACSEaseMigration.zip`) from the FTP site `/OpCon Releases/Integrations/Ease/Migration Utility` and extract it into a directory on a Windows system.
+
+Edit `Conversion.config`, setting the required values and encrypting passwords and tokens with `Encrypt.exe`.
 
 ```
 [GENERAL]
@@ -33,105 +43,91 @@ OPCON_USER_PASSWORD=6233426a6232353463484d3d
 
 where
 
-Property   |  Description
--------------------------- | ----------------
-**[OPCON]**                | Header containing the name of the target OpCon system.
-**OPCON_API_ADDRESS**      | The address and port number of the OpCon Rest-API
-**OPCON_API_TOKEN**        | An OpCon application token encrypted using the Encrypt utility.
-**OPCON_PROFILE_NAME**     | A profile name (default OPCONXPS).
-**OPCON_DB_SERVER**        | The address of the OpCon Database server.
-**OPCON_DB**               | The OpCon database name.
-**OPCON_DB_USER**          | A database user that has the required privileges to interact with the OpCon database.
-**OPCON_DB_USER_PASSWORD** | The password of the database user encrypted using the Encrypt utility.
-**OPCON_USER**             | An OpCon user that has the required privileges to interact with the schedules.
-**OPCON_USER_PASSWORD**    | The password of the OpCon user encrypted using the Encrypt utility.
+| Property | What It Does | Default | Notes |
+|---|---|---|---|
+| **DEBUG** | Enables or disables debug logging for the conversion utilities | OFF | Set in the `[GENERAL]` section |
+| **[OPCON]** | Section header identifying the target OpCon system | — | The header name must match the `-opc` argument used in the utilities |
+| **OPCON_API_ADDRESS** | Address and port number of the OpCon Rest-API | — | Required |
+| **OPCON_API_TOKEN** | OpCon application token | — | Must be encrypted using `Encrypt.exe`. Required |
+| **OPCON_PROFILE_NAME** | Profile name for the OpCon connection | OPCONXPS | — |
+| **OPCON_DB_SERVER** | Address of the OpCon database server | — | Required |
+| **OPCON_DB** | OpCon database name | — | Required |
+| **OPCON_DB_USER** | Database user with required privileges to interact with the OpCon database | — | Required |
+| **OPCON_DB_USER_PASSWORD** | Password of the database user | — | Must be encrypted using `Encrypt.exe`. Required |
+| **OPCON_USER** | OpCon user with required privileges to interact with schedules | — | Required |
+| **OPCON_USER_PASSWORD** | Password of the OpCon user | — | Must be encrypted using `Encrypt.exe`. Required |
 
-## Encrypt.exe Utility
-The Encrypt.exe utility uses standard 64 bit encryption to encrypt text strings. This utility must be used to encrypt passwords and tokens inserted into the Conversion.config file.
+## Encrypt.exe utility
+The `Encrypt.exe` utility uses 64-bit encryption to encrypt text strings. Use it to encrypt all passwords and tokens in `Conversion.config`.
 
-Arguments   |  Description
------------ | ----------------
-**-v**      | The information to encrypt. If string includes special characters, placed double quotes around the string
+| Argument | What It Does | Default | Notes |
+|---|---|---|---|
+| **-v** | The text string to encrypt | — | Enclose strings with special characters in double quotes. Required |
 
-Example on how to encrypt the value abcdefg
+To encrypt the value `abcdefg`, run:
 
 ```
 Encrypt.exe -v "abcdefg"
 
 ```
 
-### CreateEaseAgent.exe Utility
-The CreateEaseAgent.exe utility is used to create the ACS Agent definition that the tasks will use. 
+### CreateEaseAgent.exe utility
+The `CreateEaseAgent.exe` utility creates the ACS Ease agent definition used by the converted tasks.
 
-The process extracts the existing encrypted property connection information from the target OpCon system, decrypts the data and uses the
-information to set the Ease Datacenter values.
- 
-Arguments   |  Description
------------ | ----------------
-**-mn**     | The name of the ACS Ease agent to create.
-**-opc**    | The name of target OpCon system (matches a header value in the Conversion.config file). 
-**-id**     | The customer Ease ID. 
-**-p**      | The name of the encrypted property containing the connection information. 
-**-lapi**   | The address of the local OpCon Rest-API server (server:port). 
-**-lusr**   | A local user name that will be used to acess through the Rest-API. 
-**-lpwd**   | The password of the local user. 
+It extracts the encrypted Ease connection property from the target OpCon system and uses the decrypted values to configure the Ease DataCenter settings.
 
-Example on how to create an ACS Ease machine EASE001
+| Argument | What It Does | Default | Notes |
+|---|---|---|---|
+| **-mn** | Name of the ACS Ease agent to create | — | Required |
+| **-opc** | Name of the target OpCon system | — | Must match a section header in `Conversion.config`. Required |
+| **-id** | Customer Ease ID | — | Required |
+| **-p** | Name of the encrypted property containing the Ease connection information | — | Required |
+| **-lapi** | Address of the local OpCon Rest-API server | — | Format: `server:port`. Required |
+| **-lusr** | Local user name for Rest-API access | — | Required |
+| **-lpwd** | Password of the local user | — | Required |
+
+To create agent EASE001, run:
 
 ```
 CreateEaseAgent.exe -opc OPCON -mn EASE001 -id 999 -p  EaseConnection -lapi OPCON:443 -lusr apiusr -lpwd opconxps
 
 ```
 
-### ConvertEaseTasks.exe Utility
+### ConvertEaseTasks.exe utility
 
-The utility is used to convert existing Windows embedded script Ease tasks within a schedule to new ACS Ease tasks. 
-The process scans through the schedule looking for Windows tasks and then if the Windows task has an embedded script starting with the name "EASE".
-If there is a match, a copy of the Windows properties is made, the task type is reset to a Null Job. The task type is changed to ACS / Ease and then the Script arguments 
-line is converted to the new ACS Ease task and the ACS properties are then set into the task. As the new Ease environment supports the Multi ease capability, if the
-script does not have an -Identifier argument a value of **0001** will be inserted.
-  
-The advantage of following this process is that existing definitions such as frequencies, dependencies, etc are not touched and remain as they were. Only the task data type is changed.
+The `ConvertEaseTasks.exe` utility converts Windows embedded script Ease tasks to ACS Ease tasks. It scans each schedule for Windows tasks with an embedded script name starting with `EASE`. For each matching task, the utility copies the Windows properties, resets the job to a null job, sets the task type to ACS / Ease, and converts the script arguments to an ACS Ease job definition. If the script has no `-Identifier` argument, the utility inserts a default value of `0001`.
 
-Please note the definitions are case-sensitive.
+Existing definitions — frequencies, dependencies, and events — are not modified. Only the task data type changes. Definitions are case-sensitive.
 
-Arguments   |  Description
------------ | ----------------
-**-jf**     | The job filter used to determine which tasks in the schedule should be converted (supports wildcards and a value of ALL indicates all Ease embedded script tasks in the schedule must be converted).
-**-mn**     | The name of the ACS agent that the task will be associated with.
-**-opc**    | The name of target OpCon system (matches a header value in the Conversion.config file). 
-**-sf**     | The schedule filter used to determine which schedules should be converted (supports wildcards and a value of ALL indicates all schedules must be converted).
+| Argument | What It Does | Default | Notes |
+|---|---|---|---|
+| **-jf** | Job filter for tasks to convert | — | Supports wildcards. Use `ALL` to convert all matching Ease embedded script tasks. Required |
+| **-mn** | Name of the ACS agent to associate with converted tasks | — | Required |
+| **-opc** | Name of the target OpCon system | — | Must match a section header in `Conversion.config`. Required |
+| **-sf** | Schedule filter for schedules to convert | — | Supports wildcards. Use `ALL` to convert all matching schedules. Required |
 
-Example on how to convert legacy Ease embedded script tasks 
+To convert all Ease tasks in schedules matching `EASETEST??V`, run:
 
 ```
 ConvertEaseTasks.exe -opc OPCON  -mn EASE001 -sf EASETEST??V -jf ALL
 
 ```
 
-## General Conversion Process
-The first action is to create the ACS Ease Agent.
+## General conversion process
 
-### Create the Ease Agent for the connection
+Before starting the conversion, make a copy of the OpCon database and the schedules to be converted.
 
-- create the new Ease Agent using the supplied name, the name of the existing property containing the Ease connection information.
-	- provide the required arguments
+To complete the migration, complete the following steps:
 
-### Convert the PowerShell Ease tasks
-This process scans through the schedules and tasks converting the found according to the schedule and job filters. 
-It is suggested that before starting the process, a copy of the OpCon database is made as well as a copy of the schedules to be converted.
+1. Edit the `Conversion.config` file and populate the required OpCon connection values.
+2. Run `CreateEaseAgent.exe` with the required arguments to create the ACS Ease agent. See the [CreateEaseAgent.exe utility](#createeaseagentexe-utility) section for argument details.
+3. Run `ConvertEaseTasks.exe` with the required arguments to convert the Ease tasks. See the [ConvertEaseTasks.exe utility](#converteasetasksexe-utility) section for argument details.
 
-The process resets the job data from Windows to ACS. No other OpCon objects such as frequencies, dependencies, events are touched. 
+The utility processes each selected schedule and converts matching Ease embedded script jobs. No other OpCon objects such as frequencies, dependencies, or events are modified. For each matching job, the utility:
 
-- run the createEaseAgent.exe utility using the appropriate arguments.
-	- process each selected schedule
-		- get the list of master jobs associated with the schedule
-		- check if the job is a Windows job.
-		- check if the job-type is an EmBedded script job
-		- if the Embedded Script name start with **EASE**
-			- get the Windows properties associated with the job
-			- reset the job to a null job.
-			- set the machine id and the machine type (27).
-			- create the ACS properties object. 
-			- convert the script arguments to an ACS Ease job object.
-			- commit the job changes.
+- Retrieves the Windows job properties.
+- Resets the job to a null job.
+- Sets the machine definition.
+- Sets the ACS Ease task properties.
+- Converts the script arguments to an ACS Ease job definition.
+- Commits the job changes.
