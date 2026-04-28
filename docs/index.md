@@ -1,6 +1,7 @@
 ---
 slug: '/'
 hide_table_of_contents: true
+displayed_sidebar: null
 ---
 
 # EASE ACS
