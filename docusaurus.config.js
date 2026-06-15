@@ -1,11 +1,15 @@
-/** @type {import('@docusaurus/types').DocusaurusConfig} */
+/** @type {import('@docusaurus/types').Config} */
 module.exports = {
   title: 'SMA Technologies Help',
   tagline: 'EASE ACS Integration',
   url: 'https://help.smatechnologies.com',
   baseUrl: '/opcon/connectors/ease-acs-docs/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
+  },
   favicon: 'img/favicon.ico',
   organizationName: 'smatechnologies',
   projectName: 'ease-acs-docs',
